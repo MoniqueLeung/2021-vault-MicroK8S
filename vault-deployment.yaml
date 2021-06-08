@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+  labels:
+    app: vault
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: vault
+    tier: frontend
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-pv-claim
+  labels:
+    app: vault
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  labels:
+    app: vault
+spec:
+  selector:
+    matchLabels:
+      app: vault
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: vault
+        tier: frontend
+    spec:
+      containers:
+      - image: vault: 1.7.2
+        name: vault
+        env:
+        - name: VAULT_DB_HOST
+          value: vault-mysql
+        - name: VAULT_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 80
+          name: vault
+        volumeMounts:
+        - name: vault-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name:vault-persistent-storage
+        persistentVolumeClaim:
+          claimName: vault-pv-claim
