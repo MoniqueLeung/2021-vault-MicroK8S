@@ -45,7 +45,7 @@ spec:
         tier: frontend
     spec:
       containers:
-      - image: vault: 1.7.2
+      - image: vault:1.7.2
         name: vault
         env:
         - name: VAULT_DB_HOST
@@ -62,6 +62,6 @@ spec:
         - name: vault-persistent-storage
           mountPath: /var/www/html
       volumes:
-      - name:vault-persistent-storage
+      - name: vault-persistent-storage
         persistentVolumeClaim:
           claimName: vault-pv-claim
